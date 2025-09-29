@@ -5,7 +5,7 @@
   <title>Event Page – Wireframe (with Map Embed)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- (Optional) Font Awesome for the calendar icon -->
+  <!-- Font Awesome for the calendar/location icons -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -17,7 +17,7 @@
     body { margin: 0; padding: 24px 0; font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif; }
     .page { width: 1200px; margin: 0 auto; }
 
-    /* --- Featured Image (80% of page width, centered) --- */
+    /* --- Featured Image (80% width, centered) --- */
     .featured-wrap { display: flex; justify-content: center; margin-bottom: 24px; }
     .featured {
       width: 80%;
@@ -40,14 +40,41 @@
     .short-desc { margin: 0 0 24px; color: #444; }
 
     h2 { margin: 24px 0 8px; font-size: 20px; }
-    .dt-row { display: flex; align-items: center; gap: 8px; font-size: 16px; }
-    .time-line { margin-top: 4px; color: #333; }
 
+    /* Date and Time row */
+    .dt-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;           /* space between icon and text */
+      font-size: 16px;
+    }
+    .dt-row i {
+      color: #333;        /* neutral icon color */
+      flex-shrink: 0;
+    }
+
+    /* Location row (consistent with dt-row) */
+    .location-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .location-row i {
+      color: #333;
+      flex-shrink: 0;
+      line-height: 1.2;
+      margin-top: 2px; /* nudge for baseline alignment */
+    }
+    .location-lines {
+      display: flex;
+      flex-direction: column;
+    }
     .location-name { font-weight: 700; }
-    .address { margin-top: 4px; color: #333; }
+    .address { margin-top: 4px; color: #6b7280; }
 
-    /* Use details/summary to unfold the map */
-    details.map { margin-top: 10px; }
+    /* Get directions (details/summary) */
+    details.map { margin-top: 8px; }
     details.map summary {
       list-style: none;
       cursor: pointer;
@@ -69,11 +96,7 @@
       color: #777;
       font-size: 14px;
     }
-    .map-embed iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
+    .map-embed iframe { width: 100%; height: 100%; border: 0; }
 
     .full-desc { margin-top: 24px; color: #333; line-height: 1.5; }
 
@@ -107,7 +130,225 @@
     }
     .event-title { font-weight: 700; }
     .event-loc, .event-short { color: #444; font-size: 14px; }
-    .event-cta { margin-top: 8px; display: inline-block; padding: 8px 10px; border: 1px solid #000; background: #eee; text-decoration: none; color: #000; border-radius: 4px; }
+    .event-cta {
+      margin-top: 8px;
+      display: inline-flex; justify-content: center; align-items: center;
+      padding: 8px 16px; border: 1px solid #000; background: #eee;
+      text-decoration: none; color: #000; border-radius: 4px;
+      min-width: 120px; text-align: center;
+    }
+
+    /* ===================== */
+    /* Modal (popup) styles  */
+    /* ===================== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;              /* hidden by default */
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 9999;
+    }
+    .modal.open { display: flex; }
+
+    .modal-dialog {
+      width: 100%;
+      max-width: 960px;           /* fits nicely within 1200px page */
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 12px;
+    }
+    .modal-close {
+      background: #f1f1f1;
+      border: 0;
+      border-radius: 999px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .modal-body {
+      display: grid;
+      grid-template-columns: 6fr 4fr;   /* 60% / 40% */
+      gap: 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Left side */
+    .modal-left {
+      padding: 20px 24px;
+    }
+    .modal-title {
+      text-align: center;
+      color: #2f2e41;             /* darker gray like the example */
+      font-weight: 600;           /* lighter than heavy bold */
+      font-size: 20px;
+      margin: 4px 0 6px;
+    }
+    .modal-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0 0 12px;
+    }
+    .modal-left hr {
+      border: 0;
+      border-top: 1px solid #e5e7eb;   /* thin light gray */
+      margin: 12px 0 16px;
+    }
+
+    /* Form grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .form-row { display: contents; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; color: #333; }
+
+    /* Smaller text boxes */
+    .field input, .field select {
+      height: 34px;                 /* reduced height */
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font: inherit;
+      background: #fff;
+    }
+    .field input::placeholder { color: #6b7280; }
+
+    /* Promo row (revised: no extra line, smaller height, blue Apply) */
+    .promo-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .promo-row label {
+      font-size: 12px;
+      color: #2f2e41;
+    }
+    .promo-row input {
+      height: 36px;                /* reduced height */
+      border: 1px solid #2f2e41;
+      border-radius: 8px;
+      padding: 6px 86px 6px 10px;  /* space for Apply button */
+      font: inherit;
+      background: #fff;
+    }
+    .promo-row .apply {
+      color: #1a73e8;              /* blue to emphasize clickability */
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 14px;
+      position: absolute;
+      right: 14px;
+      top: calc(50% + 8px);        /* vertically center within input row */
+      transform: translateY(-50%);
+      line-height: 1;
+    }
+
+    /* Right side */
+    .modal-right {
+      padding: 20px 16px;
+      border-left: 1px solid #eee;
+      background: #fafafa;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .summary-image {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: 1px dashed #bbb;
+      background: #f5f5f5;
+      display: grid;
+      place-items: center;
+      color: #666;
+      font-size: 12px;
+    }
+    .summary-title {
+      font-weight: 600;               /* not too bold */
+      margin-top: 4px;
+    }
+    .line { border: 0; border-top: 1px solid #e5e7eb; margin: 8px 0; }
+
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .item-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .item-left strong { font-weight: 600; }  /* reduce strong weight */
+
+    .qty-controls {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 6px;
+      align-items: center;
+    }
+    .qty-btn {
+      width: 24px; height: 24px; border-radius: 4px;
+      border: 1px solid #ccc; background: #fff; cursor: pointer;
+      font: inherit; line-height: 1;
+    }
+
+    /* Sales tax row */
+    .tax-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .total-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      font-weight: 600;               /* slightly larger/stronger, not heavy */
+      font-size: 16px;
+      align-items: center;
+    }
+
+    .modal-footer {
+      padding: 14px;
+      display: grid;
+      place-items: center;
+    }
+    .modal-footer .cta {
+      /* reuse existing .cta style; nothing else here */
+    }
+
+    /* Visually-hidden utility (keeps labels for a11y if needed) */
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
   </style>
 </head>
 <body>
@@ -130,31 +371,29 @@
         <h2>Date and Time</h2>
         <div class="dt-row">
           <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-          <span style="font-size:16px">[day of week], [month] [date] • [start time] – [end time] [timezone]</span>  </div>
+          <span>[day of week], [month] [date] • [start time] – [end time] [timezone]</span>
+        </div>
 
         <h2>Location</h2>
-<div class="location-name">
-  <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-  [location name]
-</div>
-<div class="address">[location address], [location city], [location state] [location zipcode]</div>
-
-
-
-        <!-- Get Directions unfolds an actual Google Map embed -->
-        <details class="map">
-          <summary>Get Directions</summary>
-          <div class="map-embed" aria-label="Map">
-            <!-- Replace the q= value with your dynamic address as needed -->
-            <iframe
-              title="Google Map"
-              loading="lazy"
-              allowfullscreen
-              referrerpolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps?q=[location address], [location city], [location state] [location zipcode]&output=embed">
-            </iframe>
+        <div class="location-row">
+          <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+          <div class="location-lines">
+            <div class="location-name">[location name]</div>
+            <div class="address">[location address], [location city], [location state] [location zipcode]</div>
+            <details class="map">
+              <summary>Get directions</summary>
+              <div class="map-embed" aria-label="Map">
+                <iframe
+                  title="Google Map"
+                  loading="lazy"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://www.google.com/maps?q>[location address], [location city], [location state] [location zipcode]&output=embed">
+                </iframe>
+              </div>
+            </details>
           </div>
-        </details>
+        </div>
 
         <div class="full-desc">
           [event child description]
@@ -209,5 +448,173 @@
     </section>
 
   </div>
+
+  <!-- ========================= -->
+  <!-- Pop-up (Modal) Markup     -->
+  <!-- ========================= -->
+  <div class="modal" id="orderModal" aria-hidden="true" role="dialog" aria-label="Order popup">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <button class="modal-close" type="button" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Left 60% -->
+        <div class="modal-left">
+          <div class="modal-title">[child event name]</div>
+          <div class="modal-subtitle">[day of week], [month] [date] • [start time] – [end time] [timezone]</div>
+          <hr />
+          <div class="form-grid">
+            <!-- Promo code row -->
+            <div class="promo-row">
+              <label for="promo">Promo Code</label>
+              <input id="promo" type="text" placeholder="Enter code" />
+              <a href="javascript:void(0)" class="apply">Apply</a>
+            </div>
+
+            <!-- First / Last -->
+            <div class="field">
+              <label for="first" class="sr-only">First Name</label>
+              <input id="first" type="text" placeholder="First name*" />
+            </div>
+            <div class="field">
+              <label for="last" class="sr-only">Last Name</label>
+              <input id="last" type="text" placeholder="Last name*" />
+            </div>
+
+            <!-- Email / Phone -->
+            <div class="field">
+              <label for="email" class="sr-only">Email</label>
+              <input id="email" type="email" placeholder="Primary Email*" />
+            </div>
+            <div class="field">
+              <label for="phone" class="sr-only">Phone</label>
+              <input id="phone" type="tel" placeholder="Primary Phone*" />
+            </div>
+
+            <!-- Industry (dropdown) -->
+            <div class="field" style="grid-column: 1 / -1;">
+              <label for="industry">Industry</label>
+              <select id="industry">
+                <option value="">Select Industry</option>
+                <option>Real Estate</option>
+                <option>Finance</option>
+                <option>Technology</option>
+                <option>Education</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 40% -->
+        <aside class="modal-right">
+          <div class="summary-image">[child featured image]</div>
+          <div class="summary-title">Order Summary</div>
+
+          <div class="item-row">
+            <div class="item-left">
+              <span class="qty-controls">
+                <button class="qty-btn" data-action="decr" aria-label="Decrease quantity">-</button>
+                <span id="qtyVal">1</span>
+                <button class="qty-btn" data-action="incr" aria-label="Increase quantity">+</button>
+              </span>
+              <strong>[product name]</strong>
+            </div>
+            <div id="unitPrice">[product price]</div>
+          </div>
+
+          <!-- Sales Tax row -->
+          <div class="tax-row">
+            <div>Sales Tax</div>
+            <div id="salesTax">[sales tax]</div>
+          </div>
+
+          <hr class="line" />
+
+          <div class="total-row">
+            <div>Total</div>
+            <div id="totalPrice">[total price]</div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="modal-footer">
+        <a class="cta" href="javascript:void(0)">[child event cta]</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal JS to open/close and update total -->
+  <script>
+    (function () {
+      const openBtn = document.querySelector('.side-card .cta');
+      const modal = document.getElementById('orderModal');
+      const closeBtn = modal.querySelector('.modal-close');
+
+      function openModal() {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      function closeModal() {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      openBtn && openBtn.addEventListener('click', openModal);
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(); // click on backdrop
+      });
+
+      // Quantity and total computation (best-effort; uses [product price] if parseable)
+      const qtyVal = document.getElementById('qtyVal');
+      const unitPriceEl = document.getElementById('unitPrice');
+      const totalPriceEl = document.getElementById('totalPrice');
+
+      function parseAmount(str) {
+        if (!str) return NaN;
+        // extract digits and decimal separators; handles $30, ₱0.00, etc.
+        const match = (str + '').match(/[\d.,]+/);
+        if (!match) return NaN;
+        const normalized = match[0].replace(/,/g, '');
+        return parseFloat(normalized);
+      }
+
+      function formatLikeUnit(amount) {
+        const text = unitPriceEl.textContent.trim();
+        const symbolMatch = text.match(/^[^\d]+/);
+        const symbol = symbolMatch ? symbolMatch[0] : '';
+        if (isNaN(amount)) return '[total price]';
+        const decimals = /\.\d{2}/.test(text) ? 2 : 0;
+        return symbol + amount.toFixed(decimals);
+      }
+
+      function updateTotal() {
+        const qty = parseInt(qtyVal.textContent, 10) || 1;
+        const unit = parseAmount(unitPriceEl.textContent);
+        if (isNaN(unit)) {
+          totalPriceEl.textContent = '[total price]';
+        } else {
+          totalPriceEl.textContent = formatLikeUnit(qty * unit);
+        }
+      }
+
+      modal.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          let q = parseInt(qtyVal.textContent, 10) || 1;
+          if (btn.dataset.action === 'incr') q++;
+          if (btn.dataset.action === 'decr') q = Math.max(1, q - 1);
+          qtyVal.textContent = q;
+          updateTotal();
+        });
+      });
+
+      // Initialize total on first open
+      const observer = new MutationObserver(() => {
+        if (modal.classList.contains('open')) updateTotal();
+      });
+      observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    })();
+  </script>
 </body>
 </html>
